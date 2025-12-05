@@ -2,171 +2,92 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>EVOLUTION — Phase 0</title>
+<title>EVOLUTION — Істоти</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: radial-gradient(circle at top, #0f2027, #203a43, #2c5364);
-  color: white;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-#game {
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-  padding: 20px;
-}
-
-#level {
-  font-size: 18px;
-  opacity: 0.8;
-}
-
-#orb {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  margin: 30px auto;
-  background: radial-gradient(circle, #00f5ff, #005f73);
-  box-shadow: 0 0 30px #00f5ff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 26px;
-  user-select: none;
-}
-
-#orb:active {
-  transform: scale(0.95);
-}
-
-#progressBar {
-  width: 100%;
-  height: 14px;
-  background: rgba(255,255,255,0.2);
-  border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 15px;
-}
-
-#progressFill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg,#00f5ff,#9b5cff);
-}
-
-#stats {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-button {
-  width: 100%;
-  padding: 14px;
-  background: #00f5ff;
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  margin-bottom: 10px;
-}
-
-button:disabled {
-  background: #444;
-}
+body { margin: 0; font-family: Arial, sans-serif; background: radial-gradient(circle at top, #050b20, #000); color: white; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+#game { width: 100%; max-width: 420px; text-align: center; padding: 20px; position: relative; }
+#level { font-size: 18px; opacity: 0.8; transition: color 0.5s; }
+#orb { width: 220px; height: 220px; border-radius: 50%; margin: 25px auto; background: radial-gradient(circle, #00f5ff, #5b2cff); box-shadow: 0 0 40px #00f5ff; display: flex; justify-content: center; align-items: center; font-size: 26px; user-select: none; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+#orb:active { transform: scale(0.95); box-shadow: 0 0 60px #00f5ff; }
+#progressBar { width: 100%; height: 14px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin-bottom: 10px; transition: background 0.5s; }
+#progressFill { height: 100%; width: 0%; background: linear-gradient(90deg,#00f5ff,#9b5cff); transition: width 0.3s, background 0.5s; }
+#stats { display: flex; justify-content: space-between; margin-bottom: 10px; }
+button { width: 100%; padding: 12px; margin-top: 6px; background: #00f5ff; border: none; border-radius: 10px; transition: transform 0.2s; }
+button:active { transform: scale(0.95); }
+#modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; }
+#modalContent { background: #111; padding: 20px; border-radius: 12px; width: 80%; opacity: 0; transform: scale(0); transition: transform 0.3s, opacity 0.3s; }
+canvas { position: absolute; top:0; left:0; pointer-events:none; }
 </style>
 </head>
 <body>
-
+<canvas id="particles"></canvas>
+<canvas id="creatures"></canvas>
 <div id="game">
-  <div id="level">ЗАРОДЖЕННЯ</div>
-
+  <div id="level"></div>
   <div id="orb" onclick="tap()">TAP</div>
-
-  <div id="progressBar">
-    <div id="progressFill"></div>
-  </div>
-
+  <div id="progressBar"><div id="progressFill"></div></div>
   <div id="stats">
-    <div>⚡ <span id="energy">15</span></div>
-    <div>🪙 <span id="coins">0</span></div>
+    <div>⚡ <span id="energy"></span></div>
+    <div>🪙 <span id="coins"></span></div>
   </div>
-
-  <button onclick="buyEnergy()">Купити 10 енергії (30 монет)</button>
-  <button onclick="doublePower()">Подвійний тап (100 монет)</button>
+  <button onclick="buyEnergy()">Купити 10 енергії (30🪙)</button>
+  <button onclick="doublePower()">Подвійний тап (100🪙)</button>
+  <button onclick="openQuests()">Щоденні місії</button>
 </div>
-
+<div id="modal"><div id="modalContent"></div></div>
 <script>
-let state = JSON.parse(localStorage.getItem('evo_state')) || {
-  level: 0,
-  progress: 0,
-  energy: 15,
-  coins: 0,
-  power: 1
-};
+let canvas = document.getElementById('particles');
+let ctx = canvas.getContext('2d');
+let c2 = document.getElementById('creatures');
+let ctx2 = c2.getContext('2d');
+canvas.width = c2.width = window.innerWidth; canvas.height = c2.height = window.innerHeight;
 
-const levels = [
-  { name: "ЗАРОДЖЕННЯ", need: 50 },
-  { name: "МОРЕ", need: 120 },
-  { name: "СУША", need: 250 },
-  { name: "РОЗУМ", need: 400 },
-  { name: "КОСМОС", need: 700 },
-  { name: "БОЖЕСТВО", need: 1000 }
-];
+let particles = [];
+let creatures = [];
 
-function tap() {
-  if (state.energy <= 0) return alert("Немає енергії!");
-  state.energy--;
-  state.progress += state.power;
-  state.coins += state.power;
+function createParticles(x,y){ for(let i=0;i<15;i++){ particles.push({x:x,y:y,vx:(Math.random()-0.5)*4,vy:(Math.random()-1.5)*4,alpha:1}); } }
+function drawParticles(){ ctx.clearRect(0,0,canvas.width,canvas.height); particles.forEach(p=>{ ctx.fillStyle='rgba(255,255,255,'+p.alpha+')'; ctx.beginPath(); ctx.arc(p.x,p.y,4,0,Math.PI*2); ctx.fill(); p.x+=p.vx; p.y+=p.vy; p.alpha-=0.03; }); particles=particles.filter(p=>p.alpha>0); requestAnimationFrame(drawParticles); }
+drawParticles();
 
-  if (state.progress >= levels[state.level].need) {
-    state.level++;
-    state.progress = 0;
-    alert("Новий рівень!");
-  }
-
-  save();
-  render();
+function createCreature(){
+  const lvl = state.level;
+  let color = ['#6f6','##4ff','#ff8','#f8f','#88f','#fff'][lvl];
+  creatures.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:(Math.random()-0.5)*0.5, vy:(Math.random()-0.5)*0.5, r:5+Math.random()*10, color:color});
 }
+for(let i=0;i<10;i++) createCreature();
 
-function buyEnergy() {
-  if (state.coins >= 30) {
-    state.coins -= 30;
-    state.energy += 10;
-    save();
-    render();
-  }
+function drawCreatures(){
+  ctx2.clearRect(0,0,c2.width,c2.height);
+  creatures.forEach(c=>{
+    ctx2.fillStyle=c.color; ctx2.beginPath(); ctx2.arc(c.x,c.y,c.r,0,Math.PI*2); ctx2.fill();
+    c.x+=c.vx; c.y+=c.vy;
+    if(c.x<0||c.x>c2.width) c.vx*=-1;
+    if(c.y<0||c.y>c2.height) c.vy*=-1;
+  });
+  requestAnimationFrame(drawCreatures);
 }
+drawCreatures();
 
-function doublePower() {
-  if (state.coins >= 100 && state.power === 1) {
-    state.coins -= 100;
-    state.power = 2;
-    save();
-    render();
-  }
+let state = JSON.parse(localStorage.getItem('evo_state')) || { level:0, progress:0, energy:15, coins:0, power:1, fragments:{}, lastDay:new Date().toDateString() };
+const levels=[{ name:"ЗАРОДЖЕННЯ", need:50, fragments:["I AM ALIVE.","A spark in the void.","The pulse begins.","The first becoming."]},{ name:"МОРЕ", need:120, fragments:["Waves taught rhythm.","Life multiplied.","The ocean remembered.","Evolution accelerated."]},{ name:"СУША", need:250, fragments:["The land awaited.","Breath changed.","Forms reached upward.","The climb began."]},{ name:"РОЗУМ", need:400, fragments:["Thought awakened.","Logic shaped fear.","Memory formed identity.","Mind ruled matter."]},{ name:"КОСМОС", need:700, fragments:["The stars answered.","Gravity bent.","Civilizations rose.","Infinity called."]},{ name:"БОЖЕСТВО", need:1000, fragments:["Creation obeyed.","Time collapsed.","All became one.","I AM THE ALPHA AND THE OMEGA."]}];
+const quests=[{id:1,text:"Зроби 20 тапів",goal:20,reward:20,progress:0,done:false},{id:2,text:"Купи апгрейд",goal:1,reward:30,progress:0,done:false},{id:3,text:"Пройди рівень",goal:1,reward:40,progress:0,done:false}];
+
+function tap(){
+  if(state.energy<=0) return alert('Немає енергії');
+  state.energy--; state.progress+=state.power; state.coins+=state.power; quests[0].progress++;
+  const orbEl=document.getElementById('orb'); orbEl.style.transform='scale(1.1)'; setTimeout(()=>orbEl.style.transform='scale(1)',150);
+  const rect=orbEl.getBoundingClientRect(); createParticles(rect.x+rect.width/2,rect.y+rect.height/2);
+  if(state.progress>=levels[state.level].need){ quests[2].progress++; state.fragments[state.level]??=[]; const fIndex=state.fragments[state.level].length; if(fIndex<4) showFragment(levels[state.level].fragments[fIndex]); state.fragments[state.level].push(fIndex); state.level++; for(let i=0;i<5;i++) createCreature(); state.progress=0; }
+  save(); render();
 }
-
-function render() {
-  document.getElementById('energy').innerText = state.energy;
-  document.getElementById('coins').innerText = state.coins;
-  document.getElementById('level').innerText = levels[state.level].name;
-
-  let percent = (state.progress / levels[state.level].need) * 100;
-  document.getElementById('progressFill').style.width = percent + "%";
-}
-
-function save() {
-  localStorage.setItem('evo_state', JSON.stringify(state));
-}
-
+function showFragment(text){ modal(true,`<h3>Фрагмент</h3><p>${text}</p><button onclick=\"modal(false)\">OK</button>`); }
+function buyEnergy(){ if(state.coins>=30){state.coins-=30; state.energy+=10; quests[1].progress++;} save(); render();}
+function doublePower(){ if(state.coins>=100 && state.power===1){state.coins-=100; state.power=2; quests[1].progress++;} save(); render();}
+function openQuests(){ let html='<h3>Щоденні місії</h3>'; quests.forEach(q=>{ if(!q.done && q.progress>=q.goal){q.done=true; state.coins+=q.reward;} html+=`<p>${q.text} (${q.progress}/${q.goal}) ${q.done?'✅':''}</p>`}); html+='<button onclick="modal(false)">Закрити</button>'; modal(true,html); save(); render();}
+function modal(show,html=''){ const m=document.getElementById('modal'); const c=document.getElementById('modalContent'); m.style.display=show?'flex':'none'; if(show){ c.innerHTML=html; setTimeout(()=>c.style.opacity=1,50); setTimeout(()=>c.style.transform='scale(1)',50);} else { c.style.opacity=0; c.style.transform='scale(0)';}}
+function save(){localStorage.setItem('evo_state',JSON.stringify(state));}
+function render(){ document.getElementById('energy').innerText=state.energy; document.getElementById('coins').innerText=state.coins; document.getElementById('level').innerText=levels[state.level].name; document.getElementById('progressFill').style.width=(state.progress/levels[state.level].need*100)+'%';}
 render();
 </script>
 </body>
