@@ -2,240 +2,108 @@
 <html lang="uk">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
   <title>EVOLUTION — Neon Clicker</title>
   <style>
-    :root{
-      --bg:#05070b; --card:#0b0f1a; --accent:#00ffd1; --muted:#9aa3b2; --glass: rgba(255,255,255,0.05);
-      --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
-    }
+    :root{--bg:#05070b;--card:#0b0f1a;--accent:#00ffd1;--muted:#9aa3b2;--glass:rgba(255,255,255,0.05)}
     *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:var(--font);color:#eafcff;overflow:hidden}
+    html,body{height:100%;margin:0;font-family:system-ui;color:#eafcff;overflow:hidden}
 
-    /* Animated background */
-    body{
-      background: radial-gradient(circle at 20% 20%, #0b2a2f, #04070f 60%),
-                  linear-gradient(120deg, #0a1a3a, #08101f);
-      background-size: 200% 200%;
-      animation: bgMove 20s ease infinite;
-    }
+    body{background:radial-gradient(circle at 20% 20%, #0b2a2f, #04070f 60%),linear-gradient(120deg, #0a1a3a, #08101f);background-size:200% 200%;animation:bgMove 18s ease infinite}
     @keyframes bgMove{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
-    .wrap{max-width:540px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:relative;z-index:2}
+    .scene1{background:linear-gradient(180deg,#03121a,#020406)}
+    .scene2{background:linear-gradient(180deg,#022a4a,#010308)}
+    .scene3{background:linear-gradient(180deg,#3a2b02,#050505)}
+    .scene4{background:linear-gradient(180deg,#25023a,#050109)}
+    .scene5{background:linear-gradient(180deg,#02033a,#020106)}
+    .scene6{background:linear-gradient(180deg,#3a3002,#100b01)}
+
+    .wrap{max-width:540px;margin:0 auto;padding:12px;display:flex;flex-direction:column;gap:12px;min-height:100vh;position:relative;z-index:2}
     header{display:flex;align-items:center;justify-content:space-between}
     h1{font-size:20px;margin:0;letter-spacing:1px}
-    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.02));backdrop-filter: blur(8px);border-radius:16px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
 
-    .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;border-radius:16px;position:relative;min-height:280px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.09), rgba(255,255,255,0.02));backdrop-filter: blur(10px);border-radius:18px;padding:12px;box-shadow:0 10px 30px rgba(0,0,0,0.6)}
 
-    /* Pulsating orb */
-    .orb{
-      width:150px;height:150px;border-radius:999px;display:flex;align-items:center;justify-content:center;
-      font-weight:800;font-size:24px;letter-spacing:2px;
-      background: radial-gradient(circle at 30% 30%, #ffffff, var(--accent) 40%, #00bfa5 70%);
-      box-shadow: 0 0 25px var(--accent), 0 0 60px rgba(0,255,209,0.4);
-      cursor:pointer;user-select:none;
-      animation: pulse 2s ease-in-out infinite;
-      transition: transform 0.1s ease;
-    }
-    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+    .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;border-radius:18px;position:relative;min-height:300px}
+
+    .orb{width:170px;height:170px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:30px;letter-spacing:2px;background:radial-gradient(circle at 30% 30%, #ffffff, var(--accent) 40%, #009b87 75%);box-shadow:0 0 30px var(--accent),0 0 90px rgba(0,255,209,0.5);cursor:pointer;user-select:none;animation:pulse 1.8s ease-in-out infinite;transition:transform 0.05s}
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+    .orb span{font-size:42px;filter:drop-shadow(0 0 8px #fff)}
 
     .meta{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     .stats{display:flex;gap:8px;flex-wrap:wrap}
-    .stat{background:var(--glass);padding:8px 12px;border-radius:12px;font-size:14px;color:var(--muted)}
+    .stat{background:var(--glass);padding:10px 14px;border-radius:14px;font-size:14px;color:var(--muted)}
 
-    .controls{display:flex;gap:8px;justify-content:center;margin-top:10px}
-    button{background:transparent;border:1px solid rgba(255,255,255,0.12);color:inherit;padding:8px 14px;border-radius:12px;cursor:pointer}
-    .primary{background:linear-gradient(90deg,var(--accent),#00bfa5);color:#022c28;border:none}
+    .controls{display:flex;gap:10px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.14);color:inherit;padding:10px 18px;border-radius:16px;font-size:15px}
+    .primary{background:linear-gradient(90deg,var(--accent),#00bfa5);color:#022c28;border:none;font-weight:700}
 
     .upgrades{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .upgrade{background:rgba(255,255,255,0.04);padding:12px;border-radius:12px}
-    .small{font-size:13px;color:var(--muted)}
-    footer{margin-top:auto;text-align:center;color:var(--muted);font-size:13px}
+    .upgrade{background:rgba(255,255,255,0.05);padding:12px;border-radius:14px}
 
-    /* Progress bar glow */
-    .barWrap{height:14px;background:rgba(255,255,255,0.08);border-radius:10px;overflow:hidden;margin-bottom:10px}
-    #progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#00bfa5,#00ffd1);box-shadow:0 0 12px var(--accent) inset}
+    .barWrap{height:16px;background:rgba(255,255,255,0.12);border-radius:12px;overflow:hidden;margin-bottom:10px}
+    #progressBar{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#00bfa5,#00ffd1);box-shadow:0 0 15px var(--accent) inset}
 
-    /* Screen shake on level up */
-    .shake{animation:shake 0.4s}
-    @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-8px)}50%{transform:translateX(8px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)}}
+    .shake{animation:shake .45s} @keyframes shake{0%{transform:translateX(0)}25%{transform:translateX(-10px)}50%{transform:translateX(10px)}75%{transform:translateX(-6px)}100%{transform:translateX(0)}}
 
-    /* Modal */
     .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.7);z-index:40}
     .modal.open{display:flex}
-    .modal .box{width:92%;max-width:420px;background:var(--card);padding:16px;border-radius:14px;text-align:center}
+    .modal .box{width:92%;max-width:420px;background:#050a14;padding:16px;border-radius:16px;text-align:center}
 
     canvas#fx{position:fixed;inset:0;z-index:1;pointer-events:none}
 
-    @media (max-width:420px){.orb{width:120px;height:120px;font-size:20px}}
+    @media (max-width:420px){.orb{width:130px;height:130px;font-size:24px}}
   </style>
 </head>
 <body>
 <canvas id="fx"></canvas>
-  <div class="wrap" id="wrap">
-    <header>
-      <h1>EVOLUTION</h1>
-      <div class="small">Neon v2</div>
-    </header>
 
-    <section class="panel stage" id="stage">
-      <div style="position:absolute;top:12px;left:14px;font-size:13px;color:var(--muted)" id="levelName"></div>
-      <div style="position:absolute;top:12px;right:14px;font-size:13px;color:var(--muted)" id="levelPhrase"></div>
+<audio id="tapSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
+<audio id="levelSound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
 
-      <div class="orb" id="orb">TAP</div>
+<div class="wrap scene1" id="wrap">
+<header><h1>EVOLUTION</h1><div>v3</div></header>
 
-      <div style="margin-top:14px;width:100%;max-width:420px;">
-        <div class="barWrap"><div id="progressBar"></div></div>
-        <div class="meta">
-          <div class="stats">
-            <div class="stat" id="progressText"></div>
-            <div class="stat" id="energyText"></div>
-            <div class="stat" id="coinsText"></div>
-          </div>
-          <div class="controls">
-            <button id="btnUpgrades">UPGRADE</button>
-            <button class="primary" id="btnBuyEnergy">ENERGY+</button>
-          </div>
-        </div>
+<section class="panel stage" id="stage">
+  <div id="levelName"></div>
+  <div id="levelPhrase"></div>
+
+  <div class="orb" id="orb"><span id="orbIcon">🧬</span></div>
+
+  <div style="margin-top:14px;width:100%">
+    <div class="barWrap"><div id="progressBar"></div></div>
+    <div class="meta">
+      <div class="stats">
+        <div class="stat" id="progressText"></div>
+        <div class="stat" id="energyText"></div>
+        <div class="stat" id="coinsText"></div>
       </div>
-    </section>
-
-    <section class="panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <div style="font-weight:700">Upgrades</div>
-        <div class="small">Динамічні</div>
+      <div class="controls">
+        <button class="primary" id="btnBuyEnergy">ENERGY+</button>
       </div>
-
-      <div class="upgrades">
-        <div class="upgrade">
-          <div style="font-weight:700">Max Energy +</div>
-          <div class="small">+5 до денного ліміту</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div class="small" id="maxEnergyInfo"></div>
-            <button id="buyMaxEnergy">Buy <span id="costMaxEnergy"></span></button>
-          </div>
-        </div>
-
-        <div class="upgrade">
-          <div style="font-weight:700">Double Progress</div>
-          <div class="small">х2 за кожен тап</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div class="small" id="doubleInfo"></div>
-            <button id="buyDouble">Buy <span id="costDouble"></span></button>
-          </div>
-        </div>
-
-        <div class="upgrade">
-          <div style="font-weight:700">Auto Pulse</div>
-          <div class="small">Прогрес авто</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div class="small" id="autoInfo"></div>
-            <button id="buyAuto">Buy <span id="costAuto"></span></button>
-          </div>
-        </div>
-
-        <div class="upgrade">
-          <div style="font-weight:700">Buy 10 Energy</div>
-          <div class="small">миттєво</div>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-            <div class="small">Instant</div>
-            <button id="buy10Energy">Buy <span id="cost10"></span></button>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <footer class="small panel">Neon Evolution • Local save • Daily energy reset</footer>
+    </div>
   </div>
+</section>
 
-  <div class="modal" id="modal"><div class="box"><div id="modalContent"></div><div style="text-align:right;margin-top:12px"><button id="closeModal">Close</button></div></div></div>
+<section class="panel">
+<div class="upgrades">
+  <div class="upgrade"><b>Max Energy</b><button id="buyMaxEnergy">Buy</button></div>
+  <div class="upgrade"><b>Double Tap</b><button id="buyDouble">Buy</button></div>
+  <div class="upgrade"><b>Auto Pulse</b><button id="buyAuto">Buy</button></div>
+  <div class="upgrade"><b>+10 Energy</b><button id="buy10Energy">Buy</button></div>
+</div>
+</section>
+</div>
+
+<div class="modal" id="modal"><div class="box"><div id="modalContent"></div><button id="closeModal">OK</button></div></div>
 
 <script>
-// ===== GAME DATA =====
-const LEVELS = [
-  {name:'ЗАРОДЖЕННЯ',phrase:'I AM ALIVE...',need:30,color:'#00ffd1'},
-  {name:'МОРЕ',phrase:'...AND EVOLVING...',need:60,color:'#36c3ff'},
-  {name:'СУХОДІЛ',phrase:'FROM CELL...',need:100,color:'#ffd36a'},
-  {name:'РОЗУМ',phrase:'...TO MIND',need:160,color:'#b28cff'},
-  {name:'КОСМОС',phrase:'JOIN CREATION',need:240,color:'#ff8fb2'},
-  {name:'БОЖЕСТВЕННИЙ',phrase:'I AM THE ALPHA AND THE OMEGA',need:360,color:'#fff0a5'}
-];
-
-const DEFAULT={coins:0,levelIndex:0,progress:0,energyUsedToday:0,maxEnergyExtraLevel:0,doubleProgress:false,autoPulse:false,lastDay:null};
-const STORAGE_KEY='evolution_neon_v2';
-let state=loadState();
-
-// ===== DOM =====
-const orb=document.getElementById('orb');
-const progressBar=document.getElementById('progressBar');
-const progressText=document.getElementById('progressText');
-const energyText=document.getElementById('energyText');
-const coinsText=document.getElementById('coinsText');
-const levelName=document.getElementById('levelName');
-const levelPhrase=document.getElementById('levelPhrase');
-const wrap=document.getElementById('wrap');
-
-const buyMaxEnergy=document.getElementById('buyMaxEnergy');
-const buyDouble=document.getElementById('buyDouble');
-const buyAuto=document.getElementById('buyAuto');
-const buy10Energy=document.getElementById('buy10Energy');
-const btnBuyEnergy=document.getElementById('btnBuyEnergy');
-
-// ===== ENERGY =====
-function baseDailyLimit(){return 15+state.maxEnergyExtraLevel*5}
-function remainingEnergy(){return Math.max(0,baseDailyLimit()-state.energyUsedToday)}
-
-// ===== COSTS =====
-function costMaxEnergy(){return 50+state.maxEnergyExtraLevel*50}
-function costDouble(){return 120}
-function costAuto(){return 200}
-function cost10Energy(){return 30}
-
-// ===== EVENTS =====
-orb.addEventListener('click',()=>{
-  if(remainingEnergy()<=0){flash('No energy');return}
-  const gain=state.doubleProgress?2:1;
-  state.progress+=gain;
-  state.coins+=gain;
-  state.energyUsedToday++;
-  tapFX();
-  checkLevelUp();
-  saveState();render();
-});
-
-buyMaxEnergy.onclick=()=>buyUpgrade(costMaxEnergy(),()=>state.maxEnergyExtraLevel++)
-buyDouble.onclick=()=>!state.doubleProgress&&buyUpgrade(costDouble(),()=>state.doubleProgress=true)
-buyAuto.onclick=()=>{if(!state.autoPulse&&buyUpgrade(costAuto(),()=>state.autoPulse=true))startAuto()}
-buy10Energy.onclick=()=>buyUpgrade(cost10Energy(),()=>state.energyUsedToday=Math.max(0,state.energyUsedToday-10))
-btnBuyEnergy.onclick=()=>buy10Energy.onclick();
-
-function buyUpgrade(cost,cb){if(state.coins<cost){flash('Not enough coins');return false}state.coins-=cost;cb();saveState();render();return true}
-
-// ===== LEVEL =====
-function checkLevelUp(){const lvl=LEVELS[state.levelIndex];if(state.progress>=lvl.need){state.progress-=lvl.need;state.levelIndex=Math.min(LEVELS.length-1,state.levelIndex+1);state.coins+=Math.round(lvl.need/3);wrap.classList.add('shake');setTimeout(()=>wrap.classList.remove('shake'),400);flash('LEVEL UP');}}
-
-// ===== RENDER =====
-function render(){const lvl=LEVELS[state.levelIndex];levelName.textContent=lvl.name;levelPhrase.textContent=lvl.phrase;progressText.textContent=`Progress ${state.progress} / ${lvl.need}`;energyText.textContent=`Energy ${remainingEnergy()} / ${baseDailyLimit()}`;coinsText.textContent=`Coins ${state.coins}`;progressBar.style.width=Math.min(100,(state.progress/lvl.need)*100)+'%';document.documentElement.style.setProperty('--accent',lvl.color);document.getElementById('maxEnergyInfo').textContent=`Limit ${baseDailyLimit()}`;document.getElementById('costMaxEnergy').textContent=costMaxEnergy();document.getElementById('doubleInfo').textContent=state.doubleProgress?'ON':'OFF';document.getElementById('costDouble').textContent=costDouble();document.getElementById('autoInfo').textContent=state.autoPulse?'ON':'OFF';document.getElementById('costAuto').textContent=costAuto();document.getElementById('cost10').textContent=cost10Energy();}
-
-// ===== FX =====
-const canvas=document.getElementById('fx');const ctx=canvas.getContext('2d');function resize(){canvas.width=innerWidth;canvas.height=innerHeight}window.onresize=resize;resize();let particles=[];
-function tapFX(){for(let i=0;i<12;i++){particles.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,l:40,})}}
-function tick(){ctx.clearRect(0,0,canvas.width,canvas.height);particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.l--;ctx.fillStyle=getComputedStyle(document.documentElement).getPropertyValue('--accent');ctx.fillRect(p.x,p.y,3,3);if(p.l<=0)particles.splice(i,1)});requestAnimationFrame(tick)}tick();
-
-// ===== AUTO =====
-let auto=null;function startAuto(){if(auto)return;auto=setInterval(()=>{if(remainingEnergy()<=0)return;state.progress++;state.coins++;state.energyUsedToday++;checkLevelUp();saveState();render()},10000)}
-
-// ===== SAVE =====
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
-function loadState(){const raw=localStorage.getItem(STORAGE_KEY);return raw?Object.assign({},DEFAULT,JSON.parse(raw)):Object.assign({},DEFAULT)}
-
-// ===== DAILY RESET =====
-function dayReset(){const d=new Date().toISOString().slice(0,10);if(state.lastDay!==d){state.lastDay=d;state.energyUsedToday=0;saveState()}}
-setInterval(()=>{dayReset();render()},30000);dayReset();render();if(state.autoPulse)startAuto();
-
-// ===== MODAL =====
-const modal=document.getElementById('modal');const modalContent=document.getElementById('modalContent');const closeModal=document.getElementById('closeModal');closeModal.onclick=()=>modal.classList.remove('open');function flash(msg){modalContent.textContent=msg;modal.classList.add('open')}
-</script>
-</body>
-</html>
+const LEVELS=[
+{name:'ЗАРОДЖЕННЯ',phrase:'I AM ALIVE...',need:30,color:'#00ffd1',icon:'🧬',scene:'scene1'},
+{name:'МОРЕ',phrase:'...AND EVOLVING...',need:60,color:'#36c3ff',icon:'🐟',scene:'scene2'},
+{name:'СУХОДІЛ',phrase:'FROM CELL...',need:100,color:'#ffd36a',icon:'🦎',scene:'scene3'},
+{name:'РОЗУМ',phrase:'...TO MIND',need:160,color:'#b28cff',icon:'🧠',scene:'scene4'},
+{name:'КОСМОС',phrase:'JOIN CREATION',need:240,color:'#ff8fb2',icon:'🚀',scene:'scene5'},
+{name:'БОЖЕСТВЕННИЙ',phrase:'I AM THE ALPHA AND THE OMEGA',need:360,color:'#fff0a5',icon:'👁
