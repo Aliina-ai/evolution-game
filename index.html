@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1" />
+  <title>EVOLUTION — Minimal Clicker</title>
+  <style>
+    :root{
+      --bg:#07111a; --card:#0f1720; --accent:#7fe0c6; --muted:#98a0a8; --glass: rgba(255,255,255,0.03);
+      --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:var(--font);background:linear-gradient(180deg,#020405 0%, #07111a 100%);color:#e6f6f0}
+    .wrap{max-width:540px;margin:0 auto;padding:18px;display:flex;flex-direction:column;gap:12px;min-height:100vh}
+    header{display:flex;align-items:center;justify-content:space-between}
+    h1{font-size:20px;margin:0}
+    .panel{background:var(--card);border-radius:12px;padding:12px;box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+
+    .stage{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);min-height:260px;position:relative}
+    .orb{width:140px;height:140px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:22px;background:radial-gradient(circle at 30% 30%,var(--accent),#3dd7a8 60%, rgba(0,0,0,0.05));box-shadow:0 10px 30px rgba(0,0,0,0.4);cursor:pointer;user-select:none}
+    .meta{display:flex;gap:12px;align-items:center;justify-content:space-between}
+    .stats{display:flex;gap:10px;flex-wrap:wrap}
+    .stat{background:var(--glass);padding:8px 10px;border-radius:10px;font-size:14px;color:var(--muted)}
+
+    .controls{display:flex;gap:8px;justify-content:center;margin-top:10px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);color:inherit;padding:8px 12px;border-radius:10px;cursor:pointer}
+    .primary{background:linear-gradient(90deg,var(--accent),#3dd7a8);color:#052722;border:none}
+    .center{display:flex;justify-content:center}
+
+    .upgrades{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .upgrade{background:rgba(255,255,255,0.02);padding:10px;border-radius:10px}
+    .small{font-size:13px;color:var(--muted)}
+
+    footer{margin-top:auto;text-align:center;color:var(--muted);font-size:13px}
+
+    /* responsive */
+    @media (max-width:420px){.orb{width:120px;height:120px;font-size:20px}}
+
+    /* modal */
+    .modal{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:40}
+    .modal.open{display:flex}
+    .modal .box{width:92%;max-width:420px;background:var(--card);padding:16px;border-radius:12px}
+    .row{display:flex;justify-content:space-between;align-items:center}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>EVOLUTION — Minimal Clicker</h1>
+      <div class="small">v1.0</div>
+    </header>
+
+    <section class="panel stage" id="stage">
+      <div style="position:absolute;top:12px;left:14px;font-size:13px;color:var(--muted)" id="levelName">ЗАРОДЖЕННЯ</div>
+      <div style="position:absolute;top:12px;right:14px;font-size:13px;color:var(--muted)" id="levelPhrase">I AM ALIVE...</div>
+
+      <div class="orb" id="orb">TAP</div>
+
+      <div style="margin-top:14px;width:100%;max-width:420px;">
+        <div style="height:12px;background:rgba(255,255,255,0.03);border-radius:8px;overflow:hidden;margin-bottom:8px">
+          <div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),#3dd7a8)"></div>
+        </div>
+        <div class="meta">
+          <div class="stats">
+            <div class="stat" id="progressText">Progress: 0 / 30</div>
+            <div class="stat" id="energyText">Energy: 15 / 15</div>
+            <div class="stat" id="coinsText">Coins: 0</div>
+          </div>
+          <div class="controls">
+            <button id="btnUpgrades">UPGRADE</button>
+            <button id="btnBuyEnergy">Buy Energy</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div style="font-weight:700">Upgrades</div>
+        <div class="small">Прості, зрозумілі</div>
+      </div>
+
+      <div class="upgrades">
+        <div class="upgrade">
+          <div style="font-weight:700">Max Energy +</div>
+          <div class="small">Збільшує денний ліміт</div>
+          <div class="row" style="margin-top:8px">
+            <div class="small" id="maxEnergyInfo">Level 0 — Limit 15</div>
+            <button id="buyMaxEnergy">Buy (<span id="costMaxEnergy">50</span>c)</button>
+          </div>
+        </div>
+
+        <div class="upgrade">
+          <div style="font-weight:700">Double Progress</div>
+          <div class="small">Тап дає вдвічі більше прогресу</div>
+          <div class="row" style="margin-top:8px">
+            <div class="small" id="doubleInfo">OFF</div>
+            <button id="buyDouble">Buy (<span id="costDouble">100</span>c)</button>
+          </div>
+        </div>
+
+        <div class="upgrade">
+          <div style="font-weight:700">Auto Pulse</div>
+          <div class="small">+1 прогрес кожні 10с</div>
+          <div class="row" style="margin-top:8px">
+            <div class="small" id="autoInfo">OFF</div>
+            <button id="buyAuto">Buy (<span id="costAuto">150</span>c)</button>
+          </div>
+        </div>
+
+        <div class="upgrade">
+          <div style="font-weight:700">Buy 10 Energy</div>
+          <div class="small">Миттєво поповнити енергію</div>
+          <div class="row" style="margin-top:8px">
+            <div class="small">Instant</div>
+            <button id="buy10Energy">Buy (<span id="cost10">30</span>c)</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="small panel">Made for concept. Save: LocalStorage • Daily reset at local date change.</footer>
+  </div>
+
+  <!-- modal template (not used heavily, kept for extension) -->
+  <div class="modal" id="modal">
+    <div class="box">
+      <div id="modalContent"></div>
+      <div style="text-align:right;margin-top:12px"><button id="closeModal">Close</button></div>
+    </div>
+  </div>
+
+<script>
+// ====== GAME CONFIG & STATE ======
+const LEVELS = [
+  {id:1,name:'ЗАРОДЖЕННЯ',phrase:'I AM ALIVE...',need:30},
+  {id:2,name:'МОРЕ',phrase:'...AND EVOLVING...',need:60},
+  {id:3,name:'СУХОДІЛ',phrase:'FROM CELL...',need:100},
+  {id:4,name:'РОЗУМ',phrase:'...TO MIND',need:160},
+  {id:5,name:'КОСМОС',phrase:'JOIN CREATION',need:240},
+  {id:6,name:'БОЖЕСТВЕННИЙ',phrase:'I AM THE ALPHA AND THE OMEGA',need:360}
+];
+
+// defaults
+const DEFAULT = {
+  coins:0,
+  levelIndex:0,
+  progress:0,
+  energyUsedToday:0,
+  maxEnergyExtraLevel:0,
+  doubleProgress:false,
+  autoPulse:false,
+  lastDay: null
+};
+
+// localStorage key
+const STORAGE_KEY = 'evolution_v1_state';
+let state = loadState();
+
+// computed properties
+function baseDailyLimit(){
+  return 15 + state.maxEnergyExtraLevel * 5; // level0=15, each level +5
+}
+
+function currentLevel(){
+  return LEVELS[state.levelIndex];
+}
+
+// ====== DOM ======
+const orb = document.getElementById('orb');
+const progressBar = document.getElementById('progressBar');
+const progressText = document.getElementById('progressText');
+const energyText = document.getElementById('energyText');
+const coinsText = document.getElementById('coinsText');
+const levelName = document.getElementById('levelName');
+const levelPhrase = document.getElementById('levelPhrase');
+
+const btnUpgrades = document.getElementById('btnUpgrades');
+const btnBuyEnergy = document.getElementById('btnBuyEnergy');
+
+// upgrade buttons
+const buyMaxEnergy = document.getElementById('buyMaxEnergy');
+const buyDouble = document.getElementById('buyDouble');
+const buyAuto = document.getElementById('buyAuto');
+const buy10Energy = document.getElementById('buy10Energy');
+
+// costs
+function costMaxEnergy(){ return 50 + state.maxEnergyExtraLevel * 50 }
+function costDouble(){ return 120 }
+function costAuto(){ return 200 }
+function cost10Energy(){ return 30 }
+
+// ====== INIT ======
+checkDailyReset();
+render();
+startAutoPulseIfNeeded();
+
+// ====== EVENTS ======
+orb.addEventListener('click', ()=>{
+  if(getRemainingEnergy() <= 0){
+    // no energy
+    flashMessage('Energy exhausted — buy or wait');
+    return;
+  }
+  const progressGain = state.doubleProgress ? 2 : 1;
+  const prevProgress = state.progress;
+  state.progress += progressGain;
+  // coins gained proportional to progressGain
+  state.coins += progressGain;
+  state.energyUsedToday += 1;
+  saveState();
+  animateTap();
+  checkLevelUp();
+  render();
+});
+
+buyMaxEnergy.addEventListener('click', ()=>{
+  const cost = costMaxEnergy();
+  if(state.coins < cost){ flashMessage('Not enough coins'); return; }
+  state.coins -= cost;
+  state.maxEnergyExtraLevel += 1;
+  saveState(); render();
+});
+
+buyDouble.addEventListener('click', ()=>{
+  const cost = costDouble();
+  if(state.doubleProgress){ flashMessage('Already owned'); return; }
+  if(state.coins < cost){ flashMessage('Not enough coins'); return; }
+  state.coins -= cost;
+  state.doubleProgress = true;
+  saveState(); render();
+});
+
+buyAuto.addEventListener('click', ()=>{
+  const cost = costAuto();
+  if(state.autoPulse){ flashMessage('Already owned'); return; }
+  if(state.coins < cost){ flashMessage('Not enough coins'); return; }
+  state.coins -= cost;
+  state.autoPulse = true;
+  saveState(); render();
+  startAutoPulseIfNeeded();
+});
+
+buy10Energy.addEventListener('click', ()=>{
+  const cost = cost10Energy();
+  if(state.coins < cost){ flashMessage('Not enough coins'); return; }
+  state.coins -= cost;
+  // add energy by reducing energyUsedToday (cannot be negative)
+  state.energyUsedToday = Math.max(0, state.energyUsedToday - 10);
+  saveState(); render();
+});
+
+btnUpgrades.addEventListener('click', ()=>{ openModal(); });
+btnBuyEnergy.addEventListener('click', ()=>{ buy10Energy.click(); });
+
+// modal controls
+const modal = document.getElementById('modal');
+const closeModal = document.getElementById('closeModal');
+closeModal.addEventListener('click', ()=>{ closeModalBox(); });
+
+// ====== FUNCTIONS ======
+function render(){
+  const lvl = currentLevel();
+  levelName.textContent = lvl.name;
+  levelPhrase.textContent = lvl.phrase;
+  progressText.textContent = `Progress: ${state.progress} / ${lvl.need}`;
+  const pct = Math.min(100, Math.round((state.progress / lvl.need) * 100));
+  progressBar.style.width = pct + '%';
+
+  energyText.textContent = `Energy: ${Math.max(0, baseDailyLimit() - state.energyUsedToday)} / ${baseDailyLimit()}`;
+  coinsText.textContent = `Coins: ${state.coins}`;
+
+  document.getElementById('maxEnergyInfo').textContent = `Level ${state.maxEnergyExtraLevel} — Limit ${baseDailyLimit()}`;
+  document.getElementById('costMaxEnergy').textContent = costMaxEnergy();
+  document.getElementById('doubleInfo').textContent = state.doubleProgress ? 'ON' : 'OFF';
+  document.getElementById('costDouble').textContent = costDouble();
+  document.getElementById('autoInfo').textContent = state.autoPulse ? 'ON' : 'OFF';
+  document.getElementById('costAuto').textContent = costAuto();
+  document.getElementById('cost10').textContent = cost10Energy();
+
+  // visual changes per level (simple)
+  const colors = ['#7fe0c6','#6fc3ff','#ffd57f','#c28bff','#ff9fb2','#fff1c2'];
+  const bg = colors[state.levelIndex % colors.length];
+  document.documentElement.style.setProperty('--accent', bg);
+}
+
+function checkLevelUp(){
+  const lvl = currentLevel();
+  if(state.progress >= lvl.need){
+    // level up
+    state.progress = state.progress - lvl.need; // carryover
+    state.levelIndex = Math.min(LEVELS.length-1, state.levelIndex + 1);
+    // reward coins
+    state.coins += Math.round(lvl.need / 4);
+    saveState();
+    // show modal message
+    openModal(`${lvl.phrase}\n\nLevel up! Welcome to ${currentLevel().name}`);
+    render();
+  }
+}
+
+function getRemainingEnergy(){
+  return Math.max(0, baseDailyLimit() - state.energyUsedToday);
+}
+
+function animateTap(){
+  orb.animate([{transform:'scale(1)'},{transform:'scale(0.92)'},{transform:'scale(1)'}],{duration:160});
+}
+
+function flashMessage(msg){
+  openModal(msg);
+}
+
+function openModal(html){
+  document.getElementById('modalContent').innerText = html || '';
+  modal.classList.add('open');
+}
+function closeModalBox(){ modal.classList.remove('open'); }
+
+// ====== AUTO PULSE ======
+let autoInterval = null;
+function startAutoPulseIfNeeded(){
+  if(state.autoPulse && !autoInterval){
+    autoInterval = setInterval(()=>{
+      if(getRemainingEnergy() <= 0) return; // auto pulse consumes energy
+      state.progress += 1; state.coins += 1; state.energyUsedToday += 1;
+      saveState(); render(); checkLevelUp();
+    }, 10000); // 10s
+  }
+}
+
+// ====== SAVE / LOAD ======
+function saveState(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }catch(e){console.warn('Save failed',e)}
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      // merge defaults
+      return Object.assign({},DEFAULT,parsed);
+    }
+  }catch(e){console.warn('Load failed',e)}
+  return Object.assign({},DEFAULT);
+}
+
+// ====== DAILY RESET ======
+function checkDailyReset(){
+  // reset energy once per local date change
+  const today = (new Date()).toISOString().slice(0,10); // yyyy-mm-dd in UTC — OK for daily
+  if(state.lastDay !== today){
+    state.energyUsedToday = 0;
+    state.lastDay = today;
+    saveState();
+  }
+}
+
+// check every 30s in background if day changed
+setInterval(()=>{ const old = state.lastDay; checkDailyReset(); if(old!==state.lastDay) render(); },30000);
+
+// expose reset for debugging (not in production)
+window._evolution = {state, saveState};
+
+</script>
+</body>
+</html>
