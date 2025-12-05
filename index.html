@@ -106,4 +106,39 @@ const LEVELS=[
 {name:'СУХОДІЛ',phrase:'FROM CELL...',need:100,color:'#ffd36a',icon:'🦎',scene:'scene3'},
 {name:'РОЗУМ',phrase:'...TO MIND',need:160,color:'#b28cff',icon:'🧠',scene:'scene4'},
 {name:'КОСМОС',phrase:'JOIN CREATION',need:240,color:'#ff8fb2',icon:'🚀',scene:'scene5'},
-{name:'БОЖЕСТВЕННИЙ',phrase:'I AM THE ALPHA AND THE OMEGA',need:360,color:'#fff0a5',icon:'👁
+{name:'БОЖЕСТВЕННИЙ',phrase:'I AM THE ALPHA AND THE OMEGA',need:360,color:'#fff0a5',icon:'👁️',scene:'scene6'}];
+
+let state=JSON.parse(localStorage.getItem('evo_v3'))||{coins:0,level:0,progress:0,energy:15,double:false,auto:false};
+
+const orb=document.getElementById('orb');
+const orbIcon=document.getElementById('orbIcon');
+const tapSound=document.getElementById('tapSound');
+const levelSound=document.getElementById('levelSound');
+const wrap=document.getElementById('wrap');
+
+orb.onclick=()=>{
+ if(state.energy<=0)return;
+ state.progress+=state.double?2:1;
+ state.coins++;
+ state.energy--;
+ tapSound.play();
+ fx();
+ levelUp();
+ save();render();
+};
+
+function levelUp(){const lvl=LEVELS[state.level];if(state.progress>=lvl.need){state.progress=0;state.level=Math.min(LEVELS.length-1,state.level+1);levelSound.play();wrap.className='wrap '+LEVELS[state.level].scene;}}
+
+function render(){const lvl=LEVELS[state.level];orbIcon.textContent=lvl.icon;document.getElementById('levelName').textContent=lvl.name;document.getElementById('levelPhrase').textContent=lvl.phrase;document.getElementById('progressText').textContent=`${state.progress}/${lvl.need}`;document.getElementById('energyText').textContent=`Energy ${state.energy}`;document.getElementById('coinsText').textContent=`Coins ${state.coins}`;document.getElementById('progressBar').style.width=(state.progress/lvl.need*100)+'%';document.documentElement.style.setProperty('--accent',lvl.color)}
+
+function save(){localStorage.setItem('evo_v3',JSON.stringify(state))}
+
+function fx(){for(let i=0;i<15;i++){particles.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-.5)*7,vy:(Math.random()-.5)*7,l:40})}}
+
+const c=document.getElementById('fx');const ctx=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;let particles=[];
+function loop(){ctx.clearRect(0,0,c.width,c.height);particles.forEach((p,i)=>{p.x+=p.vx;p.y+=p.vy;p.l--;ctx.fillStyle='white';ctx.fillRect(p.x,p.y,3,3);if(p.l<=0)particles.splice(i,1)});requestAnimationFrame(loop)}loop();
+
+render();
+</script>
+</body>
+</html>
